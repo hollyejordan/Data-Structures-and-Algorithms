@@ -94,18 +94,18 @@ void addPaths(vector<Node>& nodes) {
 void dijkstra(vector<Node>& nodes, int startNode, int targetNode) {
 
 	auto cmpDistance = [](Node* a, Node* b) { return a->distance > b->distance; };
-	priority_queue<Node*, vector<Node*>, decltype(cmpDistance)> queue(cmpDistance);
+	priority_queue<Node*, vector<Node*>, decltype(cmpDistance)> unvisitedQueue(cmpDistance);
 
 	nodes[startNode].distance = 0; // Set the starting node's distance to zero
 	nodes[startNode].discovered = true; // Set the starting node to visited
-	queue.push(&nodes[startNode]);
+	unvisitedQueue.push(&nodes[startNode]);
 
 	Node* currentNode;
 
-	while (!queue.empty()) {
+	while (!unvisitedQueue.empty()) {
 
-		currentNode = queue.top();
-		queue.pop();
+		currentNode = unvisitedQueue.top();
+		unvisitedQueue.pop();
 
 		// Selects the node from top of queue and iterates through its neighbours
 		for (auto &neighbour : currentNode->neighbours) {
@@ -117,7 +117,7 @@ void dijkstra(vector<Node>& nodes, int startNode, int targetNode) {
 
 				if (!neighbour.first->discovered) { // If neightbour has not been visited yet
 
-					queue.push(neighbour.first); // Get ready to add it to the queue
+					unvisitedQueue.push(neighbour.first); // Get ready to add it to the queue
 					neighbour.first->discovered = true;
 				}
 			}
