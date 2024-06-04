@@ -135,6 +135,26 @@ void dijkstra(vector<Node>& nodes, int startNode, int targetNode) {
 	printDijkstraPath(nodes, startNode, targetNode);
 }
 
+// Prints the path Floyd-Warshall took
+void printFloydWarshall(vector<Node>& nodes, int startNode, int currentNode, vector<vector<int>> paths) {
+
+	string pathTaken = "";
+	pathTaken += nodes[currentNode].name; // Adds target node to path (it will work backwards towards start node)
+
+	if (paths[startNode][currentNode] == -1) { // If there is no connection from the start and target nodes
+
+		cout << "There is no path between " << startNode << " and " << currentNode;
+		return;
+	}
+
+	while (startNode != currentNode) { // While start node has not been reached
+
+		currentNode = paths[startNode][currentNode]; // Retraces the path to the previous node
+		pathTaken = nodes[currentNode].name + pathTaken; // Adds current node to the path
+	}
+	cout << "\npath: " << pathTaken << endl;
+}
+
 void floydWarshall(vector<Node>& nodes, int startNode, int targetNode) {
 
 	// Adjacency matrix of graph                     
@@ -149,61 +169,36 @@ void floydWarshall(vector<Node>& nodes, int startNode, int targetNode) {
 									{4,    20,   10,   14,   5,    21,   30,   0}   // H
 								};
 
-	vector<vector<int>> paths = {// A     B     C     D     E     F     G     H
-									{0,    0,   1000, 0,   1000, 1000, 0,   0},  // A
-									{1,   1,	 1000, 1,    1000, 1000, 1000, 1}, // B
-									{1000, 1000, 2,    2,   2,    1000, 2,   2}, // C
-									{3,   3,    3,   3,    1000, 3,   3,   3}, // D
-									{1000, 1000, 4,    1000, 4,    4,    4,   4},  // E
-									{1000, 1000, 1000, 5,   5,    5,    5,   5}, // F
-									{6,   1000, 6,   6,   6,   6,   6,    6}, // G
-									{7,    7,   7,   7,   7,    7,   7,   7}   // H
+	vector<vector<int>> paths = {//  A     B     C     D     E     F     G     H
+									{0,    0,    1000, 0,    1000, 1000, 0,    0}, // A
+									{1,    1,	 1000, 1,    1000, 1000, 1000, 1}, // B
+									{1000, 1000, 2,    2,    2,    1000, 2,    2}, // C
+									{3,    3,    3,    3,    1000, 3,    3,    3}, // D
+									{1000, 1000, 4,    1000, 4,    4,    4,    4}, // E
+									{1000, 1000, 1000, 5,    5,    5,    5,    5}, // F
+									{6,    1000, 6,    6,    6,    6,    6,    6}, // G
+									{7,    7,    7,    7,    7,    7,    7,    7}  // H
 	};
 
-	
+	// Passes from i to j via k:  i -> k -> j
+	for (int k = 0; k < matrix.size(); k++) { // For each node k to try and pass through as a middle node between two adjacent others
+		
+		for (int i = 0; i < matrix.size(); i++) { // For each row in the matrix
 
+			for (int j = 0; j < matrix.size(); j++) { // For each node in the row
 
-	for (int i = 0; i < matrix.size(); i++) {
-
-		for (int j = 0; j < matrix[i].size(); j++) {
-
-			cout << matrix[i][j] << " ";
-		}
-		cout << endl;
-	}
-
-	for (int k = 0; k < matrix.size(); k++) {
-
-		for (int i = 0; i < matrix.size(); i++) {
-
-			for (int j = 0; j < matrix.size(); j++) {
-
+				// If the route from i to j is faster via k (if i->j > i->k + k->j)
 				if (matrix[i][j] > matrix[i][k] + matrix[k][j]) {
 
-					
-					matrix[i][j] = matrix[i][k] + matrix[k][j];
-					paths[i][j] = paths[k][j];//paths[k][j];
+					matrix[i][j] = matrix[i][k] + matrix[k][j]; // Update the distance to the new, shorter distance
+					paths[i][j] = paths[k][j]; // Track the path taken by pointing to the node to pass through, k, instead of straight to j
 				}
-				//matrix[i][j] = min(matrix[i][j], matrix[i][k] + matrix[k][j]);
 			}
-
 		}
 	}
 
-
-	cout << endl << endl;
-
-	for (int i = 0; i < matrix.size(); i++) {
-
-		for (int j = 0; j < matrix[i].size(); j++) {
-
-			cout << matrix[i][j] << " ";
-		}
-		cout << endl;
-	}
-
-	cout << endl << endl << endl << "paths: " << endl;
-
+	// Prints the paths matrix
+	cout << endl << "paths: " << endl;
 	for (int i = 0; i < paths.size(); i++) {
 
 		for (int j = 0; j < paths[i].size(); j++) {
@@ -212,18 +207,15 @@ void floydWarshall(vector<Node>& nodes, int startNode, int targetNode) {
 		}
 		cout << endl;
 	}
-
-	cout << "Shortest path between " << startNode << " and " << targetNode << ": " << matrix[startNode][targetNode] << endl;
-
-
-
-
+	printFloydWarshall(nodes, startNode, targetNode, paths);
 }
 
 int main() {
 
 	vector<Node> nodes = { {'A'}, {'B'}, {'C'}, {'D'}, {'E'}, {'F'}, {'G'}, {'H'} };
 	addPaths(nodes);
+
+	cout << "Dijkstra:\n" << endl;
 	dijkstra(nodes, 0, 2); // (nodes, starting node, target node)
 
 	for (auto &node : nodes) {
@@ -231,9 +223,8 @@ int main() {
 		node.resetSelf();
 	}
 
-	cout << "\n\n\n" << endl;
+	cout << "\n\nFloyd-Warshall:" << endl;
 	floydWarshall(nodes, 0, 2);
-	
 
 	return 0;
 }
