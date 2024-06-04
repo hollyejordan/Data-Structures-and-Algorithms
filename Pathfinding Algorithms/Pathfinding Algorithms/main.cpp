@@ -12,12 +12,18 @@ public:
 
 		this->name = name; // Sets the node's name to a letter
 	}
-	
 	// Adds a connection to a neighborbouring node, and the weight of the path
 	void addPath(Node* nodeToAdd, int weight) {
 
 		neighbours.push_back(pair <Node*, int>(nodeToAdd, weight));
 	}
+	// Resets it's values for a new algorithm
+	void resetSelf() {
+
+		distance = 1000;
+		discovered = false;
+	}
+
 	vector<pair<Node*, int>> neighbours;
 	char name;
 	int distance = 1000;
@@ -129,12 +135,105 @@ void dijkstra(vector<Node>& nodes, int startNode, int targetNode) {
 	printDijkstraPath(nodes, startNode, targetNode);
 }
 
+void floydWarshall(vector<Node>& nodes, int startNode, int targetNode) {
+
+	// Adjacency matrix of graph                     
+	vector<vector<int>> matrix = {// A     B     C     D     E     F     G     H
+									{0,    10,   1000, 12,   1000, 1000, 11,   4},  // A
+									{10,   0,	 1000, 8,    1000, 1000, 1000, 20}, // B
+									{1000, 1000, 0,    17,   8,    1000, 13,   10}, // C
+									{12,   8,    17,   0,    1000, 16,   24,   14}, // D
+									{1000, 1000, 8,    1000, 0,    8,    11,   5},  // E
+									{1000, 1000, 1000, 16,   8,    0,    18,   21}, // F
+									{11,   1000, 13,   24,   11,   18,   0,    30}, // G
+									{4,    20,   10,   14,   5,    21,   30,   0}   // H
+								};
+
+	vector<vector<int>> paths = {// A     B     C     D     E     F     G     H
+									{0,    0,   1000, 0,   1000, 1000, 0,   0},  // A
+									{1,   1,	 1000, 1,    1000, 1000, 1000, 1}, // B
+									{1000, 1000, 2,    2,   2,    1000, 2,   2}, // C
+									{3,   3,    3,   3,    1000, 3,   3,   3}, // D
+									{1000, 1000, 4,    1000, 4,    4,    4,   4},  // E
+									{1000, 1000, 1000, 5,   5,    5,    5,   5}, // F
+									{6,   1000, 6,   6,   6,   6,   6,    6}, // G
+									{7,    7,   7,   7,   7,    7,   7,   7}   // H
+	};
+
+	
+
+
+	for (int i = 0; i < matrix.size(); i++) {
+
+		for (int j = 0; j < matrix[i].size(); j++) {
+
+			cout << matrix[i][j] << " ";
+		}
+		cout << endl;
+	}
+
+	for (int k = 0; k < matrix.size(); k++) {
+
+		for (int i = 0; i < matrix.size(); i++) {
+
+			for (int j = 0; j < matrix.size(); j++) {
+
+				if (matrix[i][j] > matrix[i][k] + matrix[k][j]) {
+
+					
+					matrix[i][j] = matrix[i][k] + matrix[k][j];
+					paths[i][j] = paths[k][j];//paths[k][j];
+				}
+				//matrix[i][j] = min(matrix[i][j], matrix[i][k] + matrix[k][j]);
+			}
+
+		}
+	}
+
+
+	cout << endl << endl;
+
+	for (int i = 0; i < matrix.size(); i++) {
+
+		for (int j = 0; j < matrix[i].size(); j++) {
+
+			cout << matrix[i][j] << " ";
+		}
+		cout << endl;
+	}
+
+	cout << endl << endl << endl << "paths: " << endl;
+
+	for (int i = 0; i < paths.size(); i++) {
+
+		for (int j = 0; j < paths[i].size(); j++) {
+
+			cout << paths[i][j] << " ";
+		}
+		cout << endl;
+	}
+
+	cout << "Shortest path between " << startNode << " and " << targetNode << ": " << matrix[startNode][targetNode] << endl;
+
+
+
+
+}
+
 int main() {
 
 	vector<Node> nodes = { {'A'}, {'B'}, {'C'}, {'D'}, {'E'}, {'F'}, {'G'}, {'H'} };
 	addPaths(nodes);
-
 	dijkstra(nodes, 0, 2); // (nodes, starting node, target node)
+
+	for (auto &node : nodes) {
+
+		node.resetSelf();
+	}
+
+	cout << "\n\n\n" << endl;
+	floydWarshall(nodes, 0, 2);
+	
 
 	return 0;
 }
