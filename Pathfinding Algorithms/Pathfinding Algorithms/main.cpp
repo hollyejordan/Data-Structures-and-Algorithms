@@ -12,43 +12,19 @@ public:
 
 		this->name = name; // Sets the node's name to a letter
 	}
-
 	
 	// Adds a connection to a neighborbouring node, and the weight of the path
 	void addPath(Node* nodeToAdd, int weight) {
 
 		neighbours.push_back(pair <Node*, int>(nodeToAdd, weight));
 	}
-	/*
-	vector<Node*> findShortestPaths() {
-
-		vector<Node*> nodesToAddToQueue;
-
-		for (auto neighbour : neighbours) { // For each of the current node's neighbours
-
-			// If the node's current distance from the start plus the neighbour's weight is shorter than the neighbour's currently found distance
-			if (distance + neighbour.second < neighbour.first->distance) {
-
-				neighbour.first->distance = distance + neighbour.second; // Update the neighbour's distance to the shorter path
-
-				if (!neighbour.first->visited) { // If neightbour has not been visited yet
-
-					nodesToAddToQueue.push_back(neighbour.first); // Get ready to add it to the queue
-				}
-			}
-		}
-		visited = true; // The current node has now been visited
-
-		return nodesToAddToQueue;
-	}
-	*/
 	vector<pair<Node*, int>> neighbours;
 	char name;
 	int distance = 1000;
 	bool discovered = false;
-	
 };
 
+// Creates the graph of nodes and connections
 void addPaths(vector<Node>& nodes) {
 
 	nodes[0].addPath(&nodes[1], 10);
@@ -91,10 +67,30 @@ void addPaths(vector<Node>& nodes) {
 	nodes[7].addPath(&nodes[6], 30);
 }
 
+// Prints the path that Dijkstra took
+void printDijkstraPath(vector<Node>& nodes, int startNode, int targetNode) {
+
+	string pathTaken = "";
+	Node* currentNode = &nodes[targetNode];
+	pair<Node*, int> closestNode;
+
+	auto findClosestNeighbour = [](pair<Node*, int> a, pair<Node*, int> b) { return a.first->distance < b.first->distance; }; // Lambda function for sorting neighbours by closeness to start node
+
+	while (currentNode != &nodes[startNode]) { // While the starting node has not been reached
+
+		pathTaken = currentNode->name + pathTaken; // Adds node to the front of the path taken (because it's working backwards)
+		closestNode = *min_element(currentNode->neighbours.begin(), currentNode->neighbours.end(), findClosestNeighbour); // Finds the current node's neighbour that is closest to the start node
+		currentNode = closestNode.first; // Moves to the neighbour closest to the start node
+	}
+	pathTaken = nodes[startNode].name + pathTaken; // Adds the start node to the path
+	cout << "path: " << pathTaken << endl;
+}
+
+// Path finds using Dijkstra
 void dijkstra(vector<Node>& nodes, int startNode, int targetNode) {
 
-	auto cmpDistance = [](Node* a, Node* b) { return a->distance > b->distance; };
-	priority_queue<Node*, vector<Node*>, decltype(cmpDistance)> unvisitedQueue(cmpDistance);
+	auto cmpDistance = [](Node* a, Node* b) { return a->distance > b->distance; }; // Lambda function for sorting priority queue by distance, smallest to largest
+	priority_queue<Node*, vector<Node*>, decltype(cmpDistance)> unvisitedQueue(cmpDistance); // Creates priority queue with min heap
 
 	nodes[startNode].distance = 0; // Set the starting node's distance to zero
 	nodes[startNode].discovered = true; // Set the starting node to visited
@@ -104,8 +100,15 @@ void dijkstra(vector<Node>& nodes, int startNode, int targetNode) {
 
 	while (!unvisitedQueue.empty()) {
 
-		currentNode = unvisitedQueue.top();
-		unvisitedQueue.pop();
+		currentNode = unvisitedQueue.top(); // Gets the next closest node
+		unvisitedQueue.pop(); // Removes new node from the queue
+
+		cout << currentNode->name << " " << currentNode->distance << endl;
+
+		if (currentNode == &nodes[targetNode]) { // If node is the target node
+
+			break; // Stop searching
+		}
 
 		// Selects the node from top of queue and iterates through its neighbours
 		for (auto &neighbour : currentNode->neighbours) {
@@ -118,39 +121,20 @@ void dijkstra(vector<Node>& nodes, int startNode, int targetNode) {
 				if (!neighbour.first->discovered) { // If neightbour has not been visited yet
 
 					unvisitedQueue.push(neighbour.first); // Get ready to add it to the queue
-					neighbour.first->discovered = true;
+					neighbour.first->discovered = true; // Mark neighbour as discovered
 				}
 			}
 		}
-		currentNode->discovered = true; // The current node has now been visited
-
-
-
-
-		cout << currentNode->name << " " << currentNode->distance << endl;
-
 	}
-
-
-
-	/*
-	cout << nodes[0].name << " " << nodes[0].distance << endl;
-	cout << nodes[1].name << " " << nodes[1].distance << endl;
-	cout << nodes[2].name << " " << nodes[2].distance << endl;
-	cout << nodes[3].name << " " << nodes[3].distance << endl;
-	cout << nodes[4].name << " " << nodes[4].distance << endl;
-	cout << nodes[5].name << " " << nodes[5].distance << endl;
-	cout << nodes[6].name << " " << nodes[6].distance << endl;
-	cout << nodes[7].name << " " << nodes[7].distance << endl;
-	*/
+	printDijkstraPath(nodes, startNode, targetNode);
 }
 
 int main() {
 
-	vector<Node> nodes = { {'A'}, {'B'}, {'C'}, {'D'}, {'E'}, {'F'}, {'G'}, {'H'}};
+	vector<Node> nodes = { {'A'}, {'B'}, {'C'}, {'D'}, {'E'}, {'F'}, {'G'}, {'H'} };
 	addPaths(nodes);
 
-	dijkstra(nodes, 0, 3); // (nodes, starting node, target node)
+	dijkstra(nodes, 0, 2); // (nodes, starting node, target node)
 
 	return 0;
 }
