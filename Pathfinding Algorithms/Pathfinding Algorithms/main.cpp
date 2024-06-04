@@ -13,12 +13,13 @@ public:
 		this->name = name; // Sets the node's name to a letter
 	}
 
+	
 	// Adds a connection to a neighborbouring node, and the weight of the path
 	void addPath(Node* nodeToAdd, int weight) {
 
 		neighbours.push_back(pair <Node*, int>(nodeToAdd, weight));
 	}
-
+	/*
 	vector<Node*> findShortestPaths() {
 
 		vector<Node*> nodesToAddToQueue;
@@ -40,12 +41,13 @@ public:
 
 		return nodesToAddToQueue;
 	}
+	*/
 	vector<pair<Node*, int>> neighbours;
 	char name;
 	int distance = 1000;
-	bool visited = false;
+	bool discovered = false;
+	
 };
-
 
 void addPaths(vector<Node>& nodes) {
 
@@ -89,34 +91,47 @@ void addPaths(vector<Node>& nodes) {
 	nodes[7].addPath(&nodes[6], 30);
 }
 
-int main() {
-
-	vector<Node> nodes = { {'A'}, {'B'}, {'C'}, {'D'}, {'E'}, {'F'}, {'G'}, {'H'}};
-	addPaths(nodes);
+void dijkstra(vector<Node>& nodes, int startNode, int targetNode) {
 
 	auto cmpDistance = [](Node* a, Node* b) { return a->distance > b->distance; };
 	priority_queue<Node*, vector<Node*>, decltype(cmpDistance)> queue(cmpDistance);
 
-	nodes[0].distance = 0; // Set the starting node's distance to zero
-	queue.push(&nodes[0]);
-	vector<Node*> nodesToAddToQueue;
+	nodes[startNode].distance = 0; // Set the starting node's distance to zero
+	nodes[startNode].discovered = true; // Set the starting node to visited
+	queue.push(&nodes[startNode]);
+
+	Node* currentNode;
 
 	while (!queue.empty()) {
 
-		nodesToAddToQueue = queue.top()->findShortestPaths();
-		cout << queue.top()->name << " " << queue.top()->distance << endl;
+		currentNode = queue.top();
 		queue.pop();
 
-		for (auto &node : nodesToAddToQueue) {
+		// Selects the node from top of queue and iterates through its neighbours
+		for (auto &neighbour : currentNode->neighbours) {
 
-			queue.push(node);
+			// If the node's current distance from the start plus the neighbour's weight is shorter than the neighbour's currently found distance
+			if (currentNode->distance + neighbour.second < neighbour.first->distance) {
+
+				neighbour.first->distance = currentNode->distance + neighbour.second; // Update the neighbour's distance to the shorter path
+
+				if (!neighbour.first->discovered) { // If neightbour has not been visited yet
+
+					queue.push(neighbour.first); // Get ready to add it to the queue
+					neighbour.first->discovered = true;
+				}
+			}
 		}
+		currentNode->discovered = true; // The current node has now been visited
+
+
+
+
+		cout << currentNode->name << " " << currentNode->distance << endl;
+
 	}
-	
-	cout << endl;
-	cout << endl;
-	cout << endl;
-	cout << endl;
+
+
 
 	/*
 	cout << nodes[0].name << " " << nodes[0].distance << endl;
@@ -128,6 +143,14 @@ int main() {
 	cout << nodes[6].name << " " << nodes[6].distance << endl;
 	cout << nodes[7].name << " " << nodes[7].distance << endl;
 	*/
+}
+
+int main() {
+
+	vector<Node> nodes = { {'A'}, {'B'}, {'C'}, {'D'}, {'E'}, {'F'}, {'G'}, {'H'}};
+	addPaths(nodes);
+
+	dijkstra(nodes, 0, 3); // (nodes, starting node, target node)
 
 	return 0;
 }
