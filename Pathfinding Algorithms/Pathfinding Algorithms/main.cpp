@@ -20,13 +20,13 @@ public:
 	// Resets it's values for a new algorithm
 	void resetSelf() {
 
-		distance = 1000;
+		distance = INT_MAX;
 		discovered = false;
 	}
 
 	vector<pair<Node*, int>> neighbours;
 	char name;
-	int distance = 1000;
+	int distance = INT_MAX;
 	bool discovered = false;
 };
 
@@ -158,26 +158,26 @@ void printFloydWarshall(vector<Node>& nodes, int startNode, int currentNode, vec
 void floydWarshall(vector<Node>& nodes, int startNode, int targetNode) {
 
 	// Adjacency matrix of graph                     
-	vector<vector<int>> matrix = {// A     B     C     D     E     F     G     H
-									{0,    10,   1000, 12,   1000, 1000, 11,   4},  // A
-									{10,   0,	 1000, 8,    1000, 1000, 1000, 20}, // B
-									{1000, 1000, 0,    17,   8,    1000, 13,   10}, // C
-									{12,   8,    17,   0,    1000, 16,   24,   14}, // D
-									{1000, 1000, 8,    1000, 0,    8,    11,   5},  // E
-									{1000, 1000, 1000, 16,   8,    0,    18,   21}, // F
-									{11,   1000, 13,   24,   11,   18,   0,    30}, // G
-									{4,    20,   10,   14,   5,    21,   30,   0}   // H
+	vector<vector<int>> matrix = {// A        B        C        D        E        F        G        H
+									{0,       10,      INT_MAX, 12,      INT_MAX, INT_MAX, 11,      4},  // A
+									{10,      0,	   INT_MAX, 8,       INT_MAX, INT_MAX, INT_MAX, 20}, // B
+									{INT_MAX, INT_MAX, 0,       17,      8,       INT_MAX, 13,      10}, // C
+									{12,      8,       17,      0,       INT_MAX, 16,      24,      14}, // D
+									{INT_MAX, INT_MAX, 8,       INT_MAX, 0,       8,       11,      5},  // E
+									{INT_MAX, INT_MAX, INT_MAX, 16,      8,       0,       18,      21}, // F
+									{11,      INT_MAX, 13,      24,      11,      18,      0,       30}, // G
+									{4,       20,      10,      14,      5,       21,      30,      0}   // H
 								};
 
-	vector<vector<int>> paths = {//  A     B     C     D     E     F     G     H
-									{0,    0,    1000, 0,    1000, 1000, 0,    0}, // A
-									{1,    1,	 1000, 1,    1000, 1000, 1000, 1}, // B
-									{1000, 1000, 2,    2,    2,    1000, 2,    2}, // C
-									{3,    3,    3,    3,    1000, 3,    3,    3}, // D
-									{1000, 1000, 4,    1000, 4,    4,    4,    4}, // E
-									{1000, 1000, 1000, 5,    5,    5,    5,    5}, // F
-									{6,    1000, 6,    6,    6,    6,    6,    6}, // G
-									{7,    7,    7,    7,    7,    7,    7,    7}  // H
+	vector<vector<int>> paths = {//  A    B   C   D   E   F   G    H
+									{0,   0, -1,  0, -1, -1,  0,  0}, // A
+									{1,   1, -1,  1, -1, -1, -1,  1}, // B
+									{-1, -1,  2,  2,  2, -1,  2,  2}, // C
+									{3,   3,  3,  3, -1,  3,  3,  3}, // D
+									{-1, -1,  4, -1,  4,  4,  4,  4}, // E
+									{-1, -1, -1,  5,  5,  5,  5,  5}, // F
+									{6,  -1,  6,  6,  6,  6,  6,  6}, // G
+									{7,   7,  7,  7,  7,  7,  7,  7}  // H
 	};
 
 	// Passes from i to j via k:  i -> k -> j
@@ -186,6 +186,11 @@ void floydWarshall(vector<Node>& nodes, int startNode, int targetNode) {
 		for (int i = 0; i < matrix.size(); i++) { // For each row in the matrix
 
 			for (int j = 0; j < matrix.size(); j++) { // For each node in the row
+
+				if (matrix[i][k] == INT_MAX || matrix[k][j] == INT_MAX) { // If there is no connection between i and k or k and j
+
+					continue;
+				}
 
 				// If the route from i to j is faster via k (if i->j > i->k + k->j)
 				if (matrix[i][j] > matrix[i][k] + matrix[k][j]) {
