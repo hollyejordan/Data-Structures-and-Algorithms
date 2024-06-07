@@ -124,7 +124,7 @@ void dijkstra(vector<Node>& nodes, int startNode, int targetNode) {
 
 				neighbour.first->distance = currentNode->distance + neighbour.second; // Update the neighbour's distance to the shorter path
 
-				if (!neighbour.first->discovered) { // If neightbour has not been visited yet
+				if (!neighbour.first->discovered) { // If neightbour has not been discovered yet
 
 					unvisitedQueue.push(neighbour.first); // Get ready to add it to the queue
 					neighbour.first->discovered = true; // Mark neighbour as discovered
